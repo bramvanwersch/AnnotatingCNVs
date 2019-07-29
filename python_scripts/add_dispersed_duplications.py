@@ -6,7 +6,7 @@ University: Wageningen university
 Date: 13/06/2019
 """
 
-import tsv_analyser2 as tsva
+import tsv_analyser as tsva
 import argparse
 
 def get_arguments():
