@@ -103,7 +103,7 @@ process add_dispersed_insertions{
 	file 'added_vcf.vcf' into added_vcf
 	
 	"""
-	python ~/Data/Software/python_scripts/add_dispersed_duplications.py \
+	python ../python_scripts/add_dispersed_duplications.py \
 	-vcf ${vcf} --output added_vcf.vcf
 	"""
 }
@@ -188,7 +188,7 @@ process add_info_vep_file{
 	file 'added_vep_output.txt' into added_vep_result
 
 	"""
-	python ~/Data/Software/python_scripts/vep_add_info.py \
+	python ../python_scripts/vep_add_info.py \
 	--vcf ${vcf_input_file} --vep ${vep_input_file} \
 	--output added_vep_output.txt
 	"""
@@ -238,7 +238,7 @@ if (params.run_ontology == true){
 		file 'view-*' into ontologizer_image_file
 		
 		"""
-		java -jar ~/Data/Software/ontologizer/Ontologizer.jar -g ${obo} \
+		java -jar Ontologizer.jar -g ${obo} \
 		-a ${association} -p ${pop} -s ${study}\
 		-m Benjamini-Hochberg -c Parent-Child-Union -d
 		"""
