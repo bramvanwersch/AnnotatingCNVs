@@ -108,7 +108,7 @@ def setup():
             #For saving the current GO file that is selected
         html.Div(id='go-file-name', children=GO_file, style=dict(display='none')),
 # the vep data table
-html.Div([
+        html.Div([
             html.Br(),
             dash_table.DataTable(
                 id='table-sorting-filtering-graph',
@@ -253,8 +253,8 @@ def write_from_vep_table(nc, sort_by, filter, input_name, down_choice):
     Funtion that tells the a writer function to either make a gene identifier file containing all genes present in
     the table or make a csv file consisting of the data currently displayed in the vep table.
     :param nc: Number of clicks of the run-ontologizer-button
-    :param sort_by: Sorting filter as suplied by dash.
-    :param filter: Filter as suplied by dash
+    :param sort_by: String in the form of: {column name} contains value && etc.
+    :param filter: List of Dictionaries in form of: {column_id : column_name, direction : asc of desc}
     :param input_name: The name specified by the user.
     :param down_choice: String representing the value of the radio button currently active
     :return: String that tells the user what happened during the saving of the file. Nc is none at startup so we want to
@@ -279,8 +279,8 @@ def write_ontologizer_table(nc, sort_by, filter, input_name):
     """
     Function that writes the current ontologizer table to a csv file.
     :param nc: Number of clicks of the run-ontologizer-button
-    :param sort_by: Sorting filter as suplied by dash.
-    :param filter: Filter as suplied by dash
+    :param sort_by: String in the form of: {column name} contains value && etc.
+    :param filter: List of Dictionaries in form of: {column_id : column_name, direction : asc of desc}
     :param input_name: The name specified by the user.
     :return: String that tells the user what happened during the saving of the file. Nc is none at startup so we want to
     prevent that a file gets saved.
@@ -314,8 +314,8 @@ def write_csv_file(input_name, dataframe):
 def get_gene_identifiers(sort_by, filter, input_name):
     """
     Function for saving a list of gene identifiers that is currently being displayed in the table.
-    :param sort_by: Sorting filter as suplied by dash.
-    :param filter: Filter as suplied by dash
+    :param sort_by: String in the form of: {column name} contains value && etc.
+    :param filter: List of Dictionaries in form of: {column_id : column_name, direction : asc of desc}
     :param input_name: The name specified by the user.
     :return: A string telling what happened to the file if it was saved or something else.
     """
@@ -360,13 +360,14 @@ def update_tables_graphs(page_current, page_size, sort_by, filter, type_graph, c
     Function that gets called when the user requests the vep table to be sorted or filtered.
     :param page_current: The current page the user is on
     :param page_size: Number representing the amount of hits per page
-    :param sort_by: Sorting filter as suplied by dash.
-    :param filter: Filter as suplied by dash
+    :param sort_by: String in the form of: {column name} contains value && etc.
+    :param filter: List of Dictionaries in form of: {column_id : column_name, direction : asc of desc}
     :param type_graph: A copy of the type_graph
     :param consequence_graph: A copy of the consequence graph
     :param chromosome_graph: A copy of the chromosome graph
     :return: A list containing the vep data table and the three graphs
     """
+    print(sort_by, filter)
     return_list = []
     dff = filter_sort(sort_by, filter)
     page = page_current
@@ -553,8 +554,8 @@ def update_ontologizer(nc, sort_by, filter, input_name, GO_file):
     """
     Function that runs ontologizer by executing a command line command
     :param nc: Number of clicks of the run-ontologizer-button
-    :param sort_by: Sorting filter as suplied by dash.
-    :param filter: Filter as suplied by dash
+    :param sort_by: String in the form of: {column name} contains value && etc.
+    :param filter: List of Dictionaries in form of: {column_id : column_name, direction : asc of desc}
     :param input_name: The name specified by the user.
     :param GO_file: String representing the location of the GO_file that has to be displayed in the
     :param message: String that represents what happened during the running of ontologizer and explains the output.
@@ -660,8 +661,8 @@ def change_button_state(nc, trigger):
 def filter_sort(sort_by, filter):
     """
     Function that gets called to sort and/ or filter the vep data table.
-    :param sort_by: Sorting filter as suplied by dash.
-    :param filter: Filter as suplied by dash
+    :param sort_by: String in the form of: {column name} contains value && etc.
+    :param filter: List of Dictionaries in form of: {column_id : column_name, direction : asc of desc}
     :return: pandas Dataframe that is a modified version of df as defined in the setup.
     """
     dff = df
@@ -677,7 +678,7 @@ def filter_table(filter, dff):
     more refined search. An AND, OR and exclusion operator. The AND operator is defined by a + the OR by a , and the
     exclusion by a ! at the start of the filter expression. The exclusion is basic and simply means that the filter is
     reversed.
-    :param filter: String representing the different filters that the user wants to be applied
+    :param filter: List of Dictionaries in form of: {column_id : column_name, direction : asc of desc}
     :param dff: pandas Dataframe that is a modified version of df as defined in the setup.
     :return: pandas Dataframe that is modified by the filters that are applied.
     """
@@ -758,8 +759,8 @@ def filter_locations(dff, filter_value):
 
 def sort_table(sort_by, dff):
     """
-    Function for sorting 1 column.
-    :param sort_by: Sorting filter as suplied by dash.
+    Function for sorting 1 column by the values of its rows.
+    :param sort_by: String in the form of: {column name} contains value && etc.
     :param dff: pandas Dataframe that is a modified version of df as defined in the setup.
     :return: pandas Dataframe that is sorted depending on the column.
     """
