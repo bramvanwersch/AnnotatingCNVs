@@ -34,8 +34,10 @@ if (params.run_ontology == true){
 	obo = file(params.obo)
 	association = file(params.association)
 	population = file(params.population)
+    ontologizer_file_list = [params.obo, params.association, params.population]
+    ontologizer_name_list = ["obo_file.obo", "association_file.gaf", "population_file.txt"]
 }
-else{
+else if (params.run_ontology != false){
 	error "Run_ontology argument can be true or false not ${params.run_ontology}"
 }
 
@@ -49,8 +51,8 @@ log.info "output directory: ${params.output_dir}"
 log.info "cache directory: ${params.cache_dir}"
 log.info "cache version: ${params.cache_version}"
 log.info "species: ${params.species}"
-log.info "gff(dummy1 is default): ${params.gff}"
-log.info "fasta(dummy2 is default): ${params.fasta}"
+log.info "gff: ${params.gff}"
+log.info "fasta: ${params.fasta}"
 log.info "Run ontology: ${params.run_ontology}"
 log.info "obo: ${params.obo}"
 log.info "association: ${params.association}"
@@ -60,7 +62,7 @@ log.info "population: ${params.population}"
 *FILE AND INPUT CHECK.
 *Check if a fasta and gff file are given. If neither was given it is 
 *assumed the user wants to use the cache mode of VEP. If both are given 
-* it is assumed the user wants to use the custom mode of VEP and if only
+*it is assumed the user wants to use the custom mode of VEP and if only
 *one of them is given it is assumed the user made a mistake and an eror 
 *will be printed.
 */
@@ -103,7 +105,7 @@ process add_dispersed_insertions{
 	file 'added_vcf.vcf' into added_vcf
 	
 	"""
-	python ../python_scripts/add_dispersed_duplications.py \
+	add_dispersed_duplications.py \
 	-vcf ${vcf} --output added_vcf.vcf
 	"""
 }
@@ -147,10 +149,6 @@ process run_vep{
 	val species from params.species
 	val cache_version from params.cache_version
 	val cache from params.cache_dir
-	if (params.gff != "" && params.fasta != ""){
-		file fasta
-		file gff from gff_tbi
-	}
 	
 	output:
 	file 'vep_output.txt' into vep_result
@@ -188,7 +186,7 @@ process add_info_vep_file{
 	file 'added_vep_output.txt' into added_vep_result
 
 	"""
-	python ../python_scripts/vep_add_info.py \
+	vep_add_info.py \
 	--vcf ${vcf_input_file} --vep ${vep_input_file} \
 	--output added_vep_output.txt
 	"""
@@ -237,12 +235,27 @@ if (params.run_ontology == true){
 		file 'table-*' into significant_ontologizer_results
 		file 'view-*' into ontologizer_image_file
 		
+        
 		"""
 		java -jar $Ontologizer -g ${obo} \
 		-a ${association} -p ${pop} -s ${study}\
 		-m Benjamini-Hochberg -c Parent-Child-Union -d
 		"""
 	}
+    
+    process create_symbolic_links{
+        input:
+        val loc from ontologizer_file_list
+        val name from ontologizer_name_list
+
+        beforeScript "mkdir -p ${output}"
+
+        """
+        ln -sf ${loc} ${output}/${name}
+        """
+    }
+    
+
 
 	process create_ontology_picture{
 
@@ -259,4 +272,10 @@ if (params.run_ontology == true){
 		""" 
 	}
 }
+
+log.info "\n##########VISUALISE##########"
+log.info "Use the following command to run a dash app that visualised \
+the vep and ontologizer results: visualise_vep.py ${output}"
+log.info "\n"
+
 
