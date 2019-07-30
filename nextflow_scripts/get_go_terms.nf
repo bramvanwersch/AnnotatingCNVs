@@ -40,7 +40,7 @@ process run_ontologizer{
 	file 'view-*' into ontologizer_image_file
 	
 	"""
-	java -jar Ontologizer.jar -g ${obo} \
+	java -jar $Ontologizer -g ${obo} \
 	-a ${association} -p ${pop} -s ${study}\
 	-m Benjamini-Hochberg -c Parent-Child-Union -d
 	"""
