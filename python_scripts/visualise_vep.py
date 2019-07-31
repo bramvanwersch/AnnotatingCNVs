@@ -367,7 +367,6 @@ def update_tables_graphs(page_current, page_size, sort_by, filter, type_graph, c
     :param chromosome_graph: A copy of the chromosome graph
     :return: A list containing the vep data table and the three graphs
     """
-    print(sort_by, filter)
     return_list = []
     dff = filter_sort(sort_by, filter)
     page = page_current
@@ -451,15 +450,19 @@ def update_graph_consequences(dff):
     :return: graph and table that contains the amounts and percentages of the different consequences of the cnvs.
     """
     con_names, con_vals = count_consequences(dff)
-    con_percent = [round(x / sum(con_vals) * 100, 2) for x in con_vals]
-    data = get_ordered_dict(["consequence", "amount", "percent"], list(zip(con_vals, con_percent)), con_names)
     # incase there is no data in the table
-    if con_vals == []:
+    if not len(con_vals):
         return [html.Br(),
                 html.Label(
                 children='No consequence data to display',
                 style={'marginLeft': 10}
                 )]
+    # incase the table has an even number of rows one gets split in half, to combat this a dummy row is put in.
+    elif len(con_vals) % 2 == 0 and len(con_vals) >= 10:
+        con_vals.append(0)
+        con_names.append("")
+    con_percent = [round(x / sum(con_vals) * 100, 2) for x in con_vals]
+    data = get_ordered_dict(["consequence", "amount", "percent"], list(zip(con_vals, con_percent)), con_names)
     #incase the table gets to big this value increases the column span.
     colnumcount = 2 if len(con_names) / 10 > 1 else 1
     return [html.Div(
@@ -500,14 +503,20 @@ def update_graph_chromosome_location(dff):
     :return: graph and table that contains the amounts and percentages of the distribution of the cnvs over the chromosomes
     """
     chromosomes, chrom_vals = count_chromosomes(dff)
-    chrom_percent = [round(x / sum(chrom_vals) * 100, 2) for x in chrom_vals]
-    data = get_ordered_dict(["Chromosomes", "Amount", "Percent"], list(zip(chrom_vals, chrom_percent)), chromosomes)
-    if chrom_vals == []:
+    # incase there is no data in the table
+    if not len(chrom_vals):
         return [html.Br(),
                 html.Label(
                 children='No chromosome data to display',
                 style={'marginLeft': 10}
                 )]
+    #incase the table has an even number of rows one gets split in half, to combat this a dummy row is put in.
+    elif len(chrom_vals) % 2 == 0 and len(chrom_vals) >= 10:
+        chrom_vals.append(0)
+        chromosomes.append("")
+    chrom_percent = [round(x / sum(chrom_vals) * 100, 2) for x in chrom_vals]
+    data = get_ordered_dict(["Chromosomes", "Amount", "Percent"], list(zip(chrom_vals, chrom_percent)), chromosomes)
+    #incase the table gets to big this value increases the column span.
     colnumcount = 2 if len(chromosomes) / 10 > 1 else 1
     return [html.Div(
         dcc.Graph(
