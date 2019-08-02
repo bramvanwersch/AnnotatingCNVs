@@ -1,11 +1,11 @@
 #!/home/wersc004/Data/Software/nextflow/nextflow
 
 
-/*
-*
+/*Autor: Bram van Wersch
+*University: Wageningen university
 */
 
-params.vcf = "~/Data/vcf_tests/merged_cals_07.vcf"
+params.vcf = ""
 params.output_dir = ""
 params.cache_dir = ""
 params.cache_version = ""
@@ -17,8 +17,12 @@ params.obo = ""
 params.association = ""
 params.population = ""
 
-//check if ontologizer files are specified if not make sure to raise a custom
-//error instead of the one that will be raised by nextflow.
+/*FILE SPECIFIED CHECK
+*check if ontologizer files are specified if not make sure to raise a custom
+*error instead of the one that will be raised by nextflow. Besided that 
+*make sure the user enters false if the ontologizer is not supposed to run
+*to prevent mistakes
+*/
 
 if ((params.obo == "" || params.association == "" || params.population == "") && params.run_ontology == true)
 	exit 1, "Please specify an --obo, --association and --population file"
@@ -43,7 +47,10 @@ else if (params.run_ontology != false){
 
 output = file(params.output_dir)
 
-//print out a starting sequence so people can verify their input files.
+/*
+*print out a starting sequence so people can verify their input files.
+*/
+
 log.info "\nANNOTING PLANT CNVs"
 log.info "===================================="
 log.info "VCF: ${params.vcf}"
@@ -96,6 +103,9 @@ if (params.run_ontology == "yes"){
 log.info "Running in '${mode}' mode"
 log.info "\n"
 
+/*
+*Adding insertions caused by dispersed duplications.
+*/
 process add_dispersed_insertions{
 
 	input:
@@ -110,10 +120,13 @@ process add_dispersed_insertions{
 	"""
 }
 
+/*
+*Bgzip the file and index it with tabix if the user wants to run vep with 
+*a gff and fasta file.
+*/
 if (mode == "custom"){
 	process create_bgzip_file{
 		publishDir "${output}/temp_dir"
-		
 		
 		input:
 		file gff_in
@@ -142,6 +155,11 @@ if (mode == "custom"){
 	}
 }
 
+/*
+*Run vep and depending on the mode use 2 different commands. After running
+*remove the temp dir directory that contains the bgzipped and tabbix file
+*because they had to be located here to be able to find them
+*/
 process run_vep{
 
 	input:
@@ -175,6 +193,10 @@ process run_vep{
 	
 }
 
+/*
+*Add some information that is lacking to the vep file for a more complete
+*picture
+*/
 process add_info_vep_file{
 	publishDir "${output}"	
 
@@ -192,7 +214,15 @@ process add_info_vep_file{
 	"""
 }
 
+/*
+*If the user requested to run ontologizer and all parameters are present
+*run the functions required for ontologizer
+*/
 if (params.run_ontology == true){
+    /*
+    *Get all genes that are in deletions and overlapping a coding region
+    *as test set for the ontologizer run.
+    */
 	process get_deletion_gene_names{
 		
 		input:
@@ -207,7 +237,10 @@ if (params.run_ontology == true){
 		 | cut -f 4 | sort |uniq > all_deletion_coding_cnvs.txt
 		"""
 	}
-
+    /*
+    *Filter the list of population genes on transcripts and make sure 
+    *only gene names are actualy present
+    */
 	process filter_population_genes{
 
 		input:
@@ -220,11 +253,14 @@ if (params.run_ontology == true){
 		grep -oP ".+(?=\\.)" ${population} | sort | uniq > all_population_genes.txt
 		"""
 	}
-
+    
+    /*
+    *Run ontologizer if the study file is not empty
+    */
 	process run_ontologizer{
 
 		publishDir "${output}"
-		
+            
 		input:
 		file obo
 		file association
@@ -234,15 +270,19 @@ if (params.run_ontology == true){
 		output:
 		file 'table-*' into significant_ontologizer_results
 		file 'view-*' into ontologizer_image_file
-		
         
-		"""
-		java -jar $Ontologizer -g ${obo} \
-		-a ${association} -p ${pop} -s ${study}\
-		-m Benjamini-Hochberg -c Parent-Child-Union -d
-		"""
+        """
+        java -jar $Ontologizer -g ${obo} \
+        -a ${association} -p ${pop} -s ${study}\
+        -m Benjamini-Hochberg -c Parent-Child-Union -d
+        """
 	}
     
+    /*
+    *Create symbolic links to the ontologizer files to make sure the 
+    *dash script can find them later on. Also make sure to create the
+    *directory if it does not already exist.
+    */
     process create_symbolic_links{
         input:
         val loc from ontologizer_file_list
@@ -254,9 +294,10 @@ if (params.run_ontology == true){
         ln -sf ${loc} ${output}/${name}
         """
     }
-    
 
-
+    /*
+    *Create a picture using dot if the view file was created by ontologizer
+    */
 	process create_ontology_picture{
 
 		publishDir "${output}", mode: "move"
