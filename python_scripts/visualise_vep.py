@@ -5,7 +5,7 @@ import plotly.graph_objs as go
 import dash_table
 import pandas as pd
 import subprocess
-from os import path, listdir, system
+from os import path, listdir, system, remove
 from dash.dependencies import Input, Output, State
 from io import StringIO
 from collections import OrderedDict
@@ -100,14 +100,14 @@ def setup():
         ]),
         #series of Divs for person specific data saving. These things are ment to prevent conflicts between multiple users
             # purely to dissable the ontologizer button. Does not serve any other function
-        html.Div(id='trigger', children=0, style=dict(display='none')),
+        html.Div(id='previous-ont-click-nmbr', children=0, style=dict(display='none')),
             #For saving the the previous filter value
         html.Div(id='previous-filter', children="",style=dict(display='none')),
             #for saving the ontologizer data frame
         html.Div(id='ontologizer-dataframe',children="jason data" ,style=dict(display='none')),
             #For saving the current GO file that is selected
         html.Div(id='go-file-name', children=GO_file, style=dict(display='none')),
-# the vep data table
+        # the vep data table
         html.Div([
             html.Br(),
             dash_table.DataTable(
@@ -200,15 +200,30 @@ def setup():
                 children="Run ontologizer",
             ),
                 style={'margin': 'left', 'marginLeft': 10, 'marginTop': 20, 'column': 2, }
-            ), html.Label(
+            ),
+            html.Div(dcc.Input(
+                id='ontologizer-p-value',
+                placeholder='Enter a p-value',
+                value='0.05',
+                type='text',
+            ),
+                style={'margin': 'left', 'marginLeft': 15, 'marginTop': 20, 'column': 3}
+            ),
+            html.Label(
                 id='ontologizer-run-output-label',
                 children='',
-                style={'margin': 'left', 'marginLeft': 10, 'marginTop': 20, 'column': 3}
+                style={'margin': 'left', 'marginLeft': 10, 'marginTop': 20, 'column': 4}
             ),
         ],
             className='row'),
             html.Div(
-                id="ontologizer-table-container"
+                [html.Br(),
+                 dash_table.DataTable(
+                         id="ontologizer-table",
+                         page_current=0,
+                         page_size=50
+                 )],
+                id="ontologizer-table-container",
             )]
         ),
         # For saving the csv file of hte ontologizer output.
@@ -240,7 +255,7 @@ def setup():
     print("Loaded vep and ontologizer dataframes...")
     return
 
-############ FILE SAVING FUNTIONS
+############ FILE SAVING FUNTIONS #################
 @app.callback(
     Output('vep-output-label', 'children'),
     [Input('vep-create-csv-button', 'n_clicks')],
@@ -274,8 +289,10 @@ def write_from_vep_table(nc, sort_by, filter, input_name, down_choice):
     [Input('ontologizer-create-csv-button', 'n_clicks')],
     [State('table-sorting-filtering-graph', 'sort_by'),
      State('table-sorting-filtering-graph', 'filter_query'),
-     State('ontologizer-csv-input-name', 'value')])
-def write_ontologizer_table(nc, sort_by, filter, input_name):
+     State('ontologizer-csv-input-name', 'value'),
+     State('go-file-name', 'children'),
+     State('ontologizer-p-value', 'value')])
+def write_ontologizer_table(nc, sort_by, filter, input_name, GO_file, p_value):
     """
     Function that writes the current ontologizer table to a csv file.
     :param nc: Number of clicks of the run-ontologizer-button
@@ -286,7 +303,13 @@ def write_ontologizer_table(nc, sort_by, filter, input_name):
     prevent that a file gets saved.
     """
     if nc is not None:
-        return write_csv_file(input_name, dfo[dfo["p.adjusted"] <= 0.05])
+        try:
+            dfo = pd.read_csv(GO_file, sep="\t", header=0)
+        except FileNotFoundError:
+            return "No ontologizer file found."
+        if check_valid_p_value(p_value):
+            return write_csv_file(input_name, dfo[dfo["p.adjusted"] <= float(p_value)])
+        return "Can not create a table with {} as p-value".format(p_value)
     else:
         return ''
 
@@ -431,7 +454,6 @@ def update_graph_types(dff):
         style={'margin': 'auto', 'column': 1, 'width': '50%'}
 
     ),
-
         html.Div(
             dash_table.DataTable(
                 data=pd.DataFrame(data).to_dict('records'),
@@ -441,7 +463,6 @@ def update_graph_types(dff):
             style={'margin': 'auto', 'column': 2, 'width': '50%'}
         )
     ]
-
 
 def update_graph_consequences(dff):
     """
@@ -464,7 +485,7 @@ def update_graph_consequences(dff):
     con_percent = [round(x / sum(con_vals) * 100, 2) for x in con_vals]
     data = get_ordered_dict(["consequence", "amount", "percent"], list(zip(con_vals, con_percent)), con_names)
     #incase the table gets to big this value increases the column span.
-    colnumcount = 2 if len(con_names) / 10 > 1 else 1
+    columncount = 2 if len(con_names) / 10 > 1 else 1
     return [html.Div(
         dcc.Graph(
             id='Consequence representation',
@@ -491,7 +512,7 @@ def update_graph_consequences(dff):
                 columns=[{'id': c, 'name': c} for c in ["consequence", "amount", "percent"]],
                 style_cell={'textAlign': 'left'},
             ),
-            style={'margin': 'auto', 'column': 2, 'columnCount': colnumcount, 'width': '50%'}
+            style={'margin': 'auto', 'column': 2, 'columnCount': columncount, 'width': '50%'}
         )
     ]
 
@@ -517,7 +538,7 @@ def update_graph_chromosome_location(dff):
     chrom_percent = [round(x / sum(chrom_vals) * 100, 2) for x in chrom_vals]
     data = get_ordered_dict(["Chromosomes", "Amount", "Percent"], list(zip(chrom_vals, chrom_percent)), chromosomes)
     #incase the table gets to big this value increases the column span.
-    colnumcount = 2 if len(chromosomes) / 10 > 1 else 1
+    columncount = 2 if len(chromosomes) / 10 > 1 else 1
     return [html.Div(
         dcc.Graph(
             id="chromosome graph",
@@ -545,55 +566,82 @@ def update_graph_chromosome_location(dff):
                 columns=[{'id': c, 'name': c} for c in ["Chromosomes", "Amount", "Percent"]],
                 style_cell={'textAlign': 'left'},
             ),
-            style={'margin': 'auto', 'column': 2, 'columnCount': colnumcount, 'width': '50%'}
+            style={'margin': 'auto', 'column': 2, 'columnCount': columncount, 'width': '50%'}
         )
     ]
 
 @app.callback(
     [Output('ontologizer-table-container', 'children'),
      Output('ontologizer-run-output-label', 'children'),
-     Output('trigger', 'children'),
+     Output('previous-ont-click-nmbr', 'children'),
      Output('go-file-name', 'children')],
-    [Input('run-ontologizer-button', 'n_clicks')],
+    [Input('run-ontologizer-button', 'n_clicks'),
+     Input('ontologizer-p-value', 'value'),
+     Input('table-sorting-filtering-graph', "page_current"),
+     Input('table-sorting-filtering-graph', "page_size")],
     [State('table-sorting-filtering-graph', 'sort_by'),
      State('table-sorting-filtering-graph', 'filter_query'),
      State('ontologizer-run-input-name', 'value'),
-     State('go-file-name', 'children')])
-def update_ontologizer(nc, sort_by, filter, input_name, GO_file):
+     State('go-file-name', 'children'),
+     State('previous-ont-click-nmbr', 'children')])
+def update_ontologizer(nc, p_value, page, page_size, sort_by, filter, input_name, GO_file, prev_nc):
     """
-    Function that runs ontologizer by executing a command line command
+    Function that updates the ontologizer table based when requested a new ontologizer run or when a different p-value
+    is requested
     :param nc: Number of clicks of the run-ontologizer-button
+    :param p_value: float between 0 and 1 that represents what p-values the user wants to see displayed.
+    :param page: The current page the user is on
+    :param page_size: Number representing the amount of hits per page
     :param sort_by: String in the form of: {column name} contains value && etc.
     :param filter: List of Dictionaries in form of: {column_id : column_name, direction : asc of desc}
     :param input_name: The name specified by the user.
     :param GO_file: String representing the location of the GO_file that has to be displayed in the
-    :param message: String that represents what happened during the running of ontologizer and explains the output.
+    :param prev_nc: Number of clicks before this function was called. This is to check if someone wants to run
+    ontologizer or not.
     :return: A list containing html and dash components that are either a label or a datatable depending on the
-    ontologizer file and run.
+    ontologizer file and run together with a message telling the user what happened and 2 values for saving certain data
     """
-    message = ""
     try:
         dfo = pd.read_csv(GO_file, sep="\t", header=0)
     except FileNotFoundError:
         # If no file is present give empty data frame
         dfo = pd.DataFrame()
-    if nc is not None:
+    if nc == None or prev_nc == None or nc > prev_nc:
+        return run_ontologizer(nc, sort_by, filter, input_name, GO_file, p_value, dfo, page, page_size)
+    else:
+        return create_ontologizer_data_table(dfo, p_value, page, page_size) + ["", nc, GO_file]
+
+def run_ontologizer(nc, sort_by, filter, input_name, GO_file, p_value, dfo, page, page_size):
+    """
+    Fubction that runs ontologizer by deploying a command on the command line.
+    :param nc: Number of clicks of the run-ontologizer-button
+    :param p_value: float between 0 and 1 that represents what p-values the user wants to see displayed.
+    :param sort_by: String in the form of: {column name} contains value && etc.
+    :param filter: List of Dictionaries in form of: {column_id : column_name, direction : asc of desc}
+    :param input_name: The name specified by the user.
+    :param GO_file: String representing the location of the GO_file that has to be displayed in the
+    :param dfo: pandas dataframe of ontologizer data.
+    :param page: The current page the user is on
+    :param page_size: Number representing the amount of hits per page
+    :return: A list containing html and dash components that are either a label or a datatable depending on the
+    ontologizer file and run
+    """
+    message = ""
+    if nc is not None and check_valid_p_value(p_value):
         # write a file of all the gene identifiers that are currently in the table.
         message = get_gene_identifiers(sort_by, filter, input_name)
         if "file created at" in message:
             # filterign out the correct files for the analasys
-            # TODO: make sure the files are named correctly so they can be found.
             dir_list = listdir(result_dir)
             for val in dir_list:
                 if val.endswith(".obo"):
                     obo_file = result_dir + val
                 elif val.startswith("association"):
-                    association_file = result_dir + val  # TODO: THIS FILE NEEDS TO BE NAMES association at the start
+                    association_file = result_dir + val
                 elif val.startswith("population"):
-                    population_file = result_dir + val  # TODO: THIS FILE NEEDS TO BE NAMED population at the start. --> both rename while runnign the pipeline.
+                    population_file = result_dir + val
                 elif val.startswith("ident_" + input_name):
                     study_set = result_dir + val
-
             try:
                 # String representing the command to be executed
                 command_str = "nextflow run get_go_terms.nf --obo {} --association {} --population {} --study {} --output_dir {}" \
@@ -602,25 +650,44 @@ def update_ontologizer(nc, sort_by, filter, input_name, GO_file):
 
                 # looking for the created file. If the file did not get created due to the nextflow pipeline crashing and
                 # index error is raised.
-                GO_file = [result_dir + val for val in listdir(result_dir) if
-                           val.startswith("table-ident_{}".format(input_name))][0]
+                GO_file = [result_dir + val for val in listdir(result_dir) if val.startswith("table-ident_{}"\
+                                                                                             .format(input_name))][0]
                 message = "\\".join(GO_file.split("\\")[:-1]) + GO_file
                 dfo = pd.read_csv(GO_file, sep="\t", header=0)
             except UnboundLocalError:
-                message = "Cannot find the obo and/or population and association file. Please make sure they are in {}" \
+                #remove the file that was created to prevent the program from telling the file name already exists
+                remove("{}ident_{}.txt".format(result_dir, input_name))
+                message = "Cannot find the obo and/or population and association file. Please make sure they are in {}"\
                     .format(result_dir)
             except IndexError:
-                message = "Something went wrong while running ontologizer. The output file could not be found at {}." \
+                #remove the file that was created to prevent the program from telling the file name already exists
+                remove("{}ident_{}.txt".format(result_dir, input_name))
+                message = "Something went wrong while running ontologizer. The output file could not be found at {}."\
                     .format(result_dir)
-    if not dfo.empty:
-        dffo = dfo[dfo["p.adjusted"] <= 0.05]
+    return create_ontologizer_data_table(dfo, p_value, page, page_size) + [message, nc, GO_file]
+
+def create_ontologizer_data_table(dfo, p_value, page, page_size):
+    """
+    Function that creates a data table or lable depending on the contents of dfo
+    :param dfo: pandas DataFrame that holds a table that represents the significant GO-terms found for a certain
+    ontologizer run.
+    :param p_value: float between 0 and 1 that represents what p-values the user wants to see displayed.
+    :param page: The current page the user is on
+    :param page_size: Number representing the amount of hits per page
+    :param message: String that represents what happened during the running of ontologizer and explains the output. By
+    default this is blank.
+    :return: A list containing html and dash components that are either a label or a datatable depending on the
+    ontologizer file and run.
+    """
+    if not check_valid_p_value(p_value):
+        #show no message on the label only on the label next to the run ontologizer button
+        label_message = '{} is not a valid p-value. Please enter a number inbetween 0 and 1'.format(p_value)
+    elif not dfo.empty:
+        dffo = dfo[dfo["p.adjusted"] <= float(p_value)]
+        #display a limited amount of items to prevent lag when loading the table.
+        dffo = dffo.iloc[page * page_size: (page + 1) * page_size]
         if dffo.empty:
-            # if there are no significant results return a label telling so.
-            return [[html.Br(),
-                     html.Label(
-                         children='No results with a p-value under the 0.05.',
-                         style={'marginTop': 20}
-                     )], message, nc, GO_file]
+            label_message = 'No results with a p-value under the 0.05.'
         else:
             # If there are significant results report them back in a data table.
             return [[html.Br(),
@@ -637,18 +704,18 @@ def update_ontologizer(nc, sort_by, filter, input_name, GO_file):
                          page_current=0,
                          page_size=50,
                          page_action='custom',
-                     )], message, nc, GO_file]
+                     )]]
     else:
-        # if no file was supplied innitially return a label telling so.
-        return [[html.Br(),
-                 html.Label(
-                     children='No matchig ontologizer file found.',
-                     style={'marginTop': 20}
-                 )], message, nc, GO_file]
+        label_message = 'No matchig ontologizer file found.'
+    return [[html.Br(),
+             html.Label(
+                 children=label_message,
+                 style={'marginTop': 20}
+             )]]
 
 @app.callback(Output('run-ontologizer-button', 'disabled'),
               [Input('run-ontologizer-button', 'n_clicks'),
-               Input('trigger', 'children')])
+               Input('previous-ont-click-nmbr', 'children')])
 def change_button_state(nc, trigger):
     """
     Function that dissables the run-ontologizer button while ontologizer is running
@@ -945,6 +1012,19 @@ def disect_header(myfile):
     vep_date = header[1].split("at ")[1]
     return vep_version, vep_date, len(header)
 
+def check_valid_p_value(n):
+    """
+    Function that checks if a string is a float between 0 and 1
+    :param n: a string that should represent a float between 0 and 1
+    :return: a Boolean depicting if the value is a valid float between 0 and 1.
+    """
+    try:
+        float(n)
+        if float(n) >= 0 and float(n) <= 1:
+            return True
+        return False
+    except ValueError:
+        return False
 
 if __name__ == '__main__':
     global result_dir
