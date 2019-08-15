@@ -115,7 +115,7 @@ process add_dispersed_insertions{
 	file 'added_vcf.vcf' into added_vcf
 	
 	"""
-	add_dispersed_duplications.py \
+	add_dispersed_insertions.py \
 	-vcf ${vcf} --output added_vcf.vcf
 	"""
 }
@@ -208,7 +208,7 @@ process add_info_vep_file{
 	file 'added_vep_output.txt' into added_vep_result
 
 	"""
-	vep_add_info.py \
+	correct_vep.py \
 	--vcf ${vcf_input_file} --vep ${vep_input_file} \
 	--output added_vep_output.txt
 	"""
