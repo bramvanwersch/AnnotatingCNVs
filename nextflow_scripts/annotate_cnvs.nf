@@ -161,7 +161,6 @@ if (mode == "custom"){
 *because they had to be located here to be able to find them
 */
 process run_vep{
-
 	input:
 	file input_file from added_vcf
 	val species from params.species
@@ -224,6 +223,7 @@ if (params.run_ontology == true){
     *as test set for the ontologizer run.
     */
 	process get_deletion_gene_names{
+        publishDir "${output}"
 		
 		input:
 		file input_file from added_vep_result
