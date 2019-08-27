@@ -7,7 +7,7 @@ Date: 13/06/2019
 """
 
 import sys
-import vcf_analyser as vcfa
+import python_scripts.vcf_analyser as vcfa
 import argparse
 
 def get_arguments():
