@@ -7,7 +7,7 @@ Date: 13/06/2019
 """
 
 import sys
-import python_scripts.vcf_analyser as vcfa
+import vcf_analyser as vcfa
 import argparse
 
 def get_arguments():
@@ -63,6 +63,7 @@ class AddInformationVep:
             vep_ID = self.vep_tsv[row_key]["Uploaded_variation"]
             self.check_insertion_info(self.vep_tsv[row_key])
             self.check_start_codon(self.vep_tsv[row_key])
+            self.check_transcript_amplification(self.vep_tsv[row_key])
             try:
                 vcf_info = self.vcf_tsv[vep_ID]["INFO"]
                 self.vep_tsv[row_key]["INFO"] = vcf_info
@@ -87,7 +88,7 @@ class AddInformationVep:
                     "MODERATE", "HIGH")
             elif insertion != "<INS>" and (len(insertion) - 1) % 3 == 0:
                 row_dict["Consequence"] += ",inframe_insertion"
-                # replace the consequence with moderate --> this is what the vep documentation states..
+                # replace the consequence with moderate --> this is what the vep documentation states.
                 row_dict["Extra"] = row_dict["Extra"].replace("MODIFIER", "MODERATE").replace("LOW", "MODERATE")
 
     def check_start_codon(self, row_dict):
@@ -104,6 +105,17 @@ class AddInformationVep:
                 "MODERATE", "HIGH")
         elif row_dict["Allele"] == "duplication" and "start_lost" in row_dict["Consequence"]:
             row_dict["Consequence"] = row_dict["Consequence"].replace("start_lost", "").replace(",start_retained_variant", "")
+            
+    def check_transcript_amplification(self, row_dict):
+        """
+        Function that checks if a certain duplication should be a transcript amplification. This is the case if
+        the full gene is overlapped by the duplication.
+        :param row_dict: Dictionary containing a row from the vep file.
+        """
+        if row_dict["Allele"] == "duplication" and "OverlapPC=100" in row_dict["Extra"] and \
+        "transcript_amplification" not in row_dict["Consequence"]:
+            row_dict["Consequence"] = "transcript_amplification"
+            
 
     def add_to_header(self):
         """
