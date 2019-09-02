@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+
+"""
+Author: Bram van Wersch
+University: Wageningen university
+Date: 13/06/2019
+"""
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
