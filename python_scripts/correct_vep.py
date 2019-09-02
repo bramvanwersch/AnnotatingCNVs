@@ -64,6 +64,7 @@ class AddInformationVep:
             self.check_insertion_info(self.vep_tsv[row_key])
             self.check_start_codon(self.vep_tsv[row_key])
             self.check_transcript_amplification(self.vep_tsv[row_key])
+            self.check_transcript_ablations(self.vep_tsv[row_key])
             try:
                 vcf_info = self.vcf_tsv[vep_ID]["INFO"]
                 self.vep_tsv[row_key]["INFO"] = vcf_info
@@ -115,6 +116,17 @@ class AddInformationVep:
         if row_dict["Allele"] == "duplication" and "OverlapPC=100" in row_dict["Extra"] and \
         "transcript_amplification" not in row_dict["Consequence"]:
             row_dict["Consequence"] = "transcript_amplification"
+            
+    def check_transcript_ablations(self, row_dict):
+        """
+        Function that adds missing transcript ablations. This are deletions that remove a complete gene. These are 
+        not consequenly annotated.
+	:param row_dict: Dictionary containing a row from the vep file.
+        """
+        if row_dict["Allele"] == "deletion" and "OverlapPC=100" in row_dict["Extra"] and \
+        "transcript_ablation" not in row_dict["Consequence"]:
+            row_dict["Consequence"] = "transcript_ablation"
+    
             
 
     def add_to_header(self):
