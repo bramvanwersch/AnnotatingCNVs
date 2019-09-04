@@ -43,7 +43,19 @@ Note the location column only supports the OR operator. Mixing the OR and AND op
 unexpected results. For the location column you can search using genome browser syntax eg. 1:500-5000 will return all 
 variants on chromosome 1 inbetween 500 and 5000. Note: modifier or low impact does not neccesairily mean no or low 
 impact as this is the interpretation of VEP. For more information about the impact or consequences take a look at the 
-link below:
+link below. Here are some easy examples for searches to get an idea of the possibilities:
+* For finding all variants on chromosome 2 one can simply type '2' in the filter column. For finding everything in between 
+base 100 and 500 and between 3000 and 100000 on chromosome 1 and 3 respectively you could type something like 
+'1:100-500,3:3000-10000'. Note that the exclusion(!) and AND(+) operator will not work for the location column.
+* When searching in the consequence column for instance(or any other column except for the location column) if you where
+looking for all deletions in coding regions a search like 'coding_sequence_variant,frameshift' would return all coding 
+CNVs. For looking for CNVs that overlap a 5' UTR and an intron a search in the form of '5_prime_UTR_variant+intron_variant'
+returns all CNVs that overlap both. If you want to not include all down and upstream variants a search like 
+'!downstream_gene_variant,upstream_gene_variant' will return all variants that are not upstream or downsteam variants.
+Note mixing of the OR (,) and AND (+) operators is not advised and the results can be inconsistent.
+* Finaly to finetune your search you can filter in multiple columns at the same time making it possible to find all 
+CNVs in coding regions and on chromosome 1 for instance for that to happen you would need to type a '1' in the location
+filter and 'coding_sequence_variant,frameshift' in the consequence filter.
 """
 
 ontologizer_table_explanation = """
@@ -51,9 +63,9 @@ ontologizer_table_explanation = """
 For running ontologizer from this webinterface there are a few things you should know. To run ontologizer it is assumed
 that the appropiate gene ontology, association and population files are present in the directory provided to this script. 
 The set of genes against which is tested is the set currently displayed in the table and charts. Ontologizer needs about 
-30 seconds to run so be patient. Currently the page doesnot display all results but only those that have a p-value below 
-0.05. If you want to see all results take a look at thetable-(name you provided)-Parent-Child-Union-Benjamini-Hochberg.txt 
-file. To view a graphical map of the go terms in their graph take a look at the png that was produced.
+30 seconds to run so be patient. You can filter to see results for a certain p-value. If you want to see all results simply
+set the p-value to 1. To view a graphical map of the go terms in their graph take a look at the png that was produced in 
+the directory provided to this script.
 """
 
 def setup():
@@ -786,7 +798,6 @@ def filter_table(filter, dff):
                 match = True
             filter_values = "|".join(filter_value.split(","))
             filter_values = "".join(["(?=.*{})".format(x) for x in filter_values.split("+")])
-
             dff = dff.loc[dff[col_name].str.contains(filter_values) == match]
     return dff
 
@@ -818,10 +829,17 @@ def filter_locations(dff, filter_value):
     valid_rows = []
     try:
         #value error in case of multiple :
-        chrom, startend = str(filter_value).split(":")
-        # value error in case of multiple -
-        start, end = startend.split("-")
-
+        if ":" in filter_value:
+            chrom, startend = str(filter_value).split(":")
+            # value error in case of multiple -
+            start, end = startend.split("-")
+        elif filter_value.isdigit():
+            dff = dff.loc[dff["Location"].str.contains("^{}".format(filter_value))]
+            for key, col in dff["Location"].items():
+                valid_rows.append(key)
+            return valid_rows
+        else:
+            return valid_rows
         #check if row starts with chromosome.
         dff = dff.loc[dff["Location"].str.contains("^{}".format(chrom))]
         for key, col in dff["Location"].items():
