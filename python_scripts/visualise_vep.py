@@ -1058,4 +1058,4 @@ if __name__ == '__main__':
     if not path.exists(result_dir):
         raise FileNotFoundError("Cannot locate directory: {}. Make sure the directory exists".format(result_dir))
     setup()
-    app.run_server(debug=True)
+    app.run_server()
