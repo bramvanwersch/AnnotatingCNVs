@@ -1,7 +1,30 @@
 # AnnotatingCNVs
-PLANNOTATOR is a pipeline for annotating plant CNVs using VEP(link to VEP) and visualising the resulting table in a dash application aswel as an easy way of running Ontologizer(link to ontologizer) for information on gene ontology terms.\
+PLANNOTATOR is a pipeline for annotating plant CNVs using VEP(link to VEP) and visualising the resulting table in a dash application aswel as an easy way of running Ontologizer(link to ontologizer) for information on gene ontology terms.
 ### Installation 
-TBD
+1. Create a folder to download all the programs except for the conda package into:
+```shell
+mkdir some_name
+cd some_name
+``` 
+2. Download VEP version 96 and make sure you download HTSLIB if you want to use a custom annotation genome.
+```shell
+git clone https://github.com/Ensembl/ensembl-vep.git
+cd ensembl-vep
+git pull
+git checkout release/96
+perl INSTALL.pl
+```
+3. Download a cache for vep if you want to. This depends on the species and if you have your own refernce genome or not. ftp://ftp.ensemblgenomes.org/pub/plants/current/variation/vep/ this is the place where you can find the latest release. Make sure you are in the ensembl_vep folder. This should have create a cache folder with a folder named after your species in it that contains the ensembl-cache. 
+```shell
+mkdir caches
+curl -O ftp://ftp.ensemblgenomes.org/pub/plants/current/variation/vep/name_of_the_desired_cache
+tar -xzf arabidopsis_thaliana_vep_43_TAIR10.tar.gz
+convert_cache.pl -d route/to/VEP/installation/ ensembl-vep/caches --species your_species --version version_off_cache
+```
+4. Download Ontologizer. Make sure you are in the some_name folder.
+```shell
+
+```
 ### Getting the required files
 Here is a short description for getting most of the files that you will need for running ontologizer. If these files are not available from the sources noted below then there is a chance you can find them somewhere on the internet but in my experience that chance is not to high. Alternatives are to create your own using available tools or use a webtool that has these files simply available. Study sets can be downloaded after running the final script to run your webtool with.
 
