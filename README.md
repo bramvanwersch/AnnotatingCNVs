@@ -1,12 +1,12 @@
 # AnnotatingCNVs
-PLANNOTATOR is a pipeline for annotating plant CNVs using VEP(link to VEP) and visualising the resulting table in a dash application aswel as an easy way of running Ontologizer(link to ontologizer) for information on gene ontology terms.
+PLANNOTATOR is a pipeline for annotating plant CNVs using VEP(https://www.ensembl.org/info/docs/tools/vep/index.html) and visualising the resulting table in a dash(https://dash.plot.ly/) application aswel as an easy way of running Ontologizer(http://ontologizer.de/) for information on gene ontology terms.
 ### Installation 
 1. Create a folder to download all the programs except for the conda package into:
 ```shell
 mkdir some_name
 cd some_name
 ``` 
-2. Download VEP version 96 and make sure you download HTSLIB if you want to use a custom annotation genome.
+2. Download VEP version 96 and make sure you download HTSLIB if you want to use a custom annotation genome. Also check https://www.ensembl.org/info/docs/tools/vep/index.html if you have troubles installing.
 ```shell
 git clone https://github.com/Ensembl/ensembl-vep.git
 cd ensembl-vep
@@ -38,6 +38,20 @@ grep -oP ".+(?=\.)" nameOfFile | sort | uniq > geneIdentifiers.txt
 8. Downloading nextflow. Nextflow is the pipeline program that is used for making the pipeline. It can be downloaded with one simple command. Again make sure you are in the some_name folder.
 ```shell
 curl -s https://get.nextflow.io | bash
+```
+9. Download this github in the some_name folder using and remove the python scripts (these are later downloaded by conda.:
+```shell
+git clone https://github.com/bramvanwersch/AnnotatingCNVs
+rm -rf python_scripts/
+```
+10. To install the conda package(this assumes that conda is installed if this is not the case it can be downloaded here; https://docs.anaconda.com/anaconda/install/) that contains all python scripts use the envirionment.yml file that was just downloaded from github use the commands below to get all modules installed in an evironment named plannotater.
+```shell
+conda config --add channels conda-forge
+conda env create -f evironment.yml
+```
+11. Activating the conda environment. This is something you will have to do every time you restart the terminal:
+```shell
+conda activate plannotator
 ```
 
 ### Usage
