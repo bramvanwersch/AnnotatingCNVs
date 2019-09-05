@@ -21,21 +21,24 @@ curl -O ftp://ftp.ensemblgenomes.org/pub/plants/current/variation/vep/name_of_th
 tar -xzf arabidopsis_thaliana_vep_43_TAIR10.tar.gz
 convert_cache.pl -d route/to/VEP/installation/ ensembl-vep/caches --species your_species --version version_off_cache
 ```
-4. Download Ontologizer. Make sure you are in the some_name folder.
+4. Downloading Ontologizer(optional). Make sure you are in the some_name folder:
 ```shell
-
+wget http://ontologizer.de/cmdline/Ontologizer.jar
 ```
-### Getting the required files
-Here is a short description for getting most of the files that you will need for running ontologizer. If these files are not available from the sources noted below then there is a chance you can find them somewhere on the internet but in my experience that chance is not to high. Alternatives are to create your own using available tools or use a webtool that has these files simply available. Study sets can be downloaded after running the final script to run your webtool with.
+5. Download the Obo file(optional). This file can simply be downloaded from the ontologizer website using:
+```shell
+wget http://purl.obolibrary.org/obo/go/go-basic.obo
+```  
+6. Downloading an association file(optional). This is a file that holds the association between the gene names and ontologizer terms, it is different for each organism and a list of available association files can be found on http://current.geneontology.org/products/pages/downloads.html.
 
-__Obo file__: wget http://purl.obolibrary.org/obo/go/go-basic.obo
-
-__Association file__: is different for each organism and not all organisms have an association file. List of available files can be found on http://current.geneontology.org/products/pages/downloads.html
-
-__Population file__: Is a file that lists all the genes of an organism seperated by newlines. Finding these files is different for each organism. Make sure that there are gene identifiers in these files and not transcript identifiers. If the file is filled with transcript identifiers you can use:
-- grep -oP ".+(?=\.)" nameOfFile | sort | uniq > geneIdentifiers.txt
-
-This removes the .number extension of all the transcripts and filters out all the double names and puts it into a file called geneIdentifiers.txt
+7. Downloading the population file(optional). Is a file that lists all the genes of an organism seperated by newlines. Finding these files is different for each organism. Make sure that there are gene identifiers in these files and not transcript identifiers. If the file is filled with transcript identifiers you can use the bash command below to remove everything after the . and return all unique genes into a file named geneIdentifiers.txt
+```shell
+grep -oP ".+(?=\.)" nameOfFile | sort | uniq > geneIdentifiers.txt
+``` 
+8. Downloading nextflow. Nextflow is the pipeline program that is used for making the pipeline. It can be downloaded with one simple command. Again make sure you are in the some_name folder.
+```shell
+curl -s https://get.nextflow.io | bash
+```
 
 ### Usage
 To start the pipeline run the annotate_cnvs.nf script. This is the main pipeline script, there are allot necesairy files to run the full pipeline. Here is a list of them:
