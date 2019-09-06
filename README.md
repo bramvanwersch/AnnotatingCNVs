@@ -25,7 +25,7 @@ convert_cache.pl -d route/to/VEP/installation/ ensembl-vep/caches --species your
 ```shell
 wget http://ontologizer.de/cmdline/Ontologizer.jar
 ```
-5. Download the Obo file(optional). This file can simply be downloaded from the ontologizer website using:
+5. Download the Obo file(optional). This file can simply be downloaded from the geneontology website using:
 ```shell
 wget http://purl.obolibrary.org/obo/go/go-basic.obo
 ```  
@@ -42,12 +42,11 @@ curl -s https://get.nextflow.io | bash
 9. Download this github in the some_name folder using and remove the python scripts (these are later downloaded by conda.:
 ```shell
 git clone https://github.com/bramvanwersch/AnnotatingCNVs
-rm -rf python_scripts/
 ```
-10. To install the conda package(this assumes that conda is installed if this is not the case it can be downloaded here; https://docs.anaconda.com/anaconda/install/) that contains all python scripts use the envirionment.yml file that was just downloaded from github use the commands below to get all modules installed in an evironment named plannotater.
+10. To install the conda package(this assumes that conda is installed if this is not the case it can be downloaded here; https://docs.anaconda.com/anaconda/install/) that contains all python scripts use the envirionment.yaml file that was just downloaded from github use the commands below to get all modules installed in an evironment named plannotater.
 ```shell
 conda config --add channels conda-forge
-conda env create -f evironment.yml
+conda env create -f evironment.yaml
 ```
 11. Activating the conda environment. This is something you will have to do every time you restart the terminal:
 ```shell
@@ -71,5 +70,11 @@ Command | Required | Explanation | default
 --association | if run_ontology = true | File that contains the associations of ontology terms with the genes of an organism. See getting files section for more information
 --population  | if run_ontology = true | All genes (not transcripts) of the organism of interest. See getting files section for more information
 
-Example of a command 
-annotate_cnvs.nf --vcf location/of/vcf/file --cache_dir directory/of/downloaded/cache --cache_version cache/verion --species name/of/species --output_dir name/of/output/directory --obo obo/file --association association/file/of/species --population all/known/genes/of/species
+Example of a command to run the annotation of your vcf file:
+```shell
+nextflow run annotate_cnvs.nf --vcf location/of/vcf/file --cache_dir directory/of/downloaded/cache --cache_version cache/verion --species name/of/species --output_dir name/of/output/directory --obo obo/file --association association/file/of/species --population all/known/genes/of/species
+```
+Example of a command for running the dash application:
+```shell
+visualise_vep.py name/of/output/directory/of/annotation/vcf
+```
