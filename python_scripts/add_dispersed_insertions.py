@@ -6,7 +6,7 @@ University: Wageningen university
 Date: 13/06/2019
 """
 
-import python_scripts.vcf_analyser as vcfa
+import vcf_analyser as vcfa
 import argparse
 
 
