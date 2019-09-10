@@ -1,7 +1,9 @@
 
 params.location = ""
+params.dispersed_insertions = "AnnotatingCNVs/python_scripts/add_dispersed_insertions.py"
 output = file(params.location)
 
+program_file_list2 = [params.dispersed_insertions]
 program_file_list = ["AnnotatingCNVs/python_scripts/add_dispersed_insertions.py",\
                     "AnnotatingCNVs/python_scripts/correct_vep.py",\
                     "AnnotatingCNVs/python_scripts/vcf_analyser.py",\
