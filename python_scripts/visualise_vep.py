@@ -833,7 +833,7 @@ def filter_locations(dff, filter_value):
             chrom, startend = str(filter_value).split(":")
             # value error in case of multiple -
             start, end = startend.split("-")
-        elif filter_value.isdigit():
+        elif filter_value in unique_chromosomes:
             dff = dff.loc[dff["Location"].str.contains("^{}".format(filter_value))]
             for key, col in dff["Location"].items():
                 valid_rows.append(key)
