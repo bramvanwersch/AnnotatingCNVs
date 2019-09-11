@@ -18,7 +18,7 @@ cd ensembl-vep
 ```
 4. Run the install.py file in the AnnotatingCNVs/python_scripts folder. This will install VEP Ontologizer and nextflow and create a bin file for all the relevant scripts and programs. Vep is going to prompt for some input so read what is says and answer accordingly. Note make sure you are in the ensembl-vep folder or pearl packages get installed in the wrong place and VEP wil not work:
 ```shell
-python ../AnnotatingCNVs/python_scripts/install.py path/to/the/ensembl-vep/folder
+python ../AnnotatingCNVs/python_scripts/install.py
 ```
 5. Add the following line to your path:
 ```shell
