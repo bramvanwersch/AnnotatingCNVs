@@ -29,4 +29,4 @@ def install(location):
         system("ln -sf ../{} ../bin".format(file_loc))
 
 if __name__ == "__main__":
-    install(loc)
+    install()
