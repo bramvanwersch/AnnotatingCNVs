@@ -6,7 +6,6 @@ University: Wageningen university
 Date: 13/06/2019
 """
 
-from sys import argv
 from os import system
 
 def install(location):
@@ -20,9 +19,9 @@ def install(location):
                     "ensembl-vep/vep",\
                     "nextflow"]
     system("git clone https://github.com/Ensembl/ensembl-vep.git .")
-    #system("git checkout release/96 {}".format(location))
-    #system("perl {}/INSTALL.pl".format(location))
-    #system("mkdir {}/caches".format(location))
+    system("git checkout release/96 ")
+    system("perl INSTALL.pl")
+    system("mkdir caches")
     system("wget http://ontologizer.de/cmdline/Ontologizer.jar -P ..")
     system("cd ../ && curl -s https://get.nextflow.io | bash")
     system("mkdir -p ../bin")
@@ -30,5 +29,4 @@ def install(location):
         system("ln -sf ../{} ../bin".format(file_loc))
 
 if __name__ == "__main__":
-    loc = argv[1]
     install(loc)
