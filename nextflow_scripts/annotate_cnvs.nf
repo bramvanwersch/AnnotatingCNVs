@@ -115,7 +115,7 @@ process add_dispersed_insertions{
 	file 'added_vcf.vcf' into added_vcf
 	
 	"""
-	python ../python_scripts/add_dispersed_insertions.py \
+	add_dispersed_insertions.py \
 	-vcf ${vcf} --output added_vcf.vcf
 	"""
 }
@@ -176,14 +176,14 @@ process run_vep{
 	script:
 	if (mode == "cache")
 		"""
-		../../ensembl-vep/vep --cache --offline --numbers --force_overwrite --dir ${cache}\
+		vep --cache --offline --numbers --force_overwrite --dir ${cache}\
 		--species ${species} --cache_version ${cache_version}\
 		 -i ${input_file} -o vep_output.txt
 		"""
 		
 	else if (mode == "custom")
 		"""
-		../../ensembl-vep/vep --numbers --force_overwrite \
+		vep --numbers --force_overwrite \
 		--gff ${output}/temp_dir/gff_file.gff.gz --fasta ${fasta}\
 		 -i ${input_file} -o vep_output.txt
 		"""
@@ -208,7 +208,7 @@ process add_info_vep_file{
 	file 'added_vep_output.txt' into added_vep_result
 
 	"""
-	python ../python_scripts/correct_vep.py \
+	correct_vep.py \
 	--vcf ${vcf_input_file} --vep ${vep_input_file} \
 	--output added_vep_output.txt
 	"""
@@ -273,7 +273,7 @@ if (params.run_ontology == true){
 		file 'view-*' into ontologizer_image_file
         
         """
-        java -jar ../../Ontologizer.jar -g ${obo} \
+        java -jar Ontologizer.jar -g ${obo} \
         -a ${association} -p ${pop} -s ${study}\
         -m Benjamini-Hochberg -c Parent-Child-Union -d
         """
