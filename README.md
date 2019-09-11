@@ -2,19 +2,35 @@
 PLANNOTATOR is a pipeline for annotating plant CNVs using VEP(https://www.ensembl.org/info/docs/tools/vep/index.html) and visualising the resulting table in a dash(https://dash.plot.ly/) application aswel as an easy way of running Ontologizer(http://ontologizer.de/) for information on gene ontology terms.
 ### Installation 
 
-1. Download this github into the folder that you want to install plannotator into.
+1. Create a folder for the plannotator installation:
 ```shell
 mkdir plannotator
 cd plannotator
+```
+2. Download the plannotator github:
+```shell
 git clone https://github.com/bramvanwersch/AnnotatingCNVs
 ```
-10. To install the conda package(this assumes that conda is installed if this is not the case it can be downloaded here; https://docs.anaconda.com/anaconda/install/) that contains all python scripts use the envirionment.yaml file that was just downloaded from github use the commands below to get all modules installed in an evironment named plannotater.
+3. Create a folder called ensembl-vep and go into it for the vep installation:
+```shell
+mkdir ensembl-vep
+cd ensembl-vep
+```
+4. Run the install.py file in the AnnotatingCNVs/python_scripts folder. This will install VEP Ontologizer and nextflow and create a bin file for all the relevant scripts and programs. Vep is going to prompt for some input so read what is says and answer acoordingly:
+```shell
+python ../AnnotatingCNVs/python_scripts/install.py
+```
+5. Add the following line to your path:
+```shell
+export PATH=$PATH:~/route/to/plannotator/folder/bin
+```
+6. To install the conda package(this assumes that conda is installed if this is not the case it can be downloaded here; https://docs.anaconda.com/anaconda/install/) that contains all python scripts use the envirionment.yaml file that was just downloaded from github use the commands below to get all modules installed in an evironment named plannotater.
 ```shell
 conda config --add channels conda-forge
 cd AnnotatingCNVs
 conda env create -f environment.yaml
 ```
-11. Activating the conda environment. This is something you will have to do every time you restart the terminal:
+7. Activating the conda environment. This is something you will have to do every time you restart the terminal:
 ```shell
 conda activate plannotator
 ```
