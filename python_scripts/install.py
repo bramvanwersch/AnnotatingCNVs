@@ -20,26 +20,15 @@ def install(location):
                     "ensembl-vep/vep",\
                     "nextflow"]
     system("mkdir {}/plannotator".format(location))
-    #system("git clone https://github.com/Ensembl/ensembl-vep.git {}/plannotator/ensembl-vep".format(location))
-    #system("git checkout-release/96 {}/plannotator/ensembl-vep".format(location))
-    #system("perl {}/plannotator/ensembl-vep/INSTALL.pl".format(location))
-    #system("mkdir {}/plannotator/ensembl-vep/caches".format(location))
+    system("git clone https://github.com/Ensembl/ensembl-vep.git {}/plannotator/ensembl-vep".format(location))
+    system("git checkout-release/96 {}/plannotator/ensembl-vep".format(location))
+    system("perl {}/plannotator/ensembl-vep/INSTALL.pl".format(location))
+    system("mkdir {}/plannotator/ensembl-vep/caches".format(location))
     system("wget http://ontologizer.de/cmdline/Ontologizer.jar -P {}/plannotator".format(location))
     system("cd {}/plannotator && curl -s https://get.nextflow.io | bash".format(location))
     system("mkdir -p {}/plannotator/bin".format(location))
     for file_loc in program_file_list:
-        print("{}/plannotator/{}".format(location, file_loc))
         system("ln -sf {}/plannotator/{} {}/plannotator/bin".format(location,file_loc, location))
-    
-
-    
-
-    
-    
-
-
-    
-    
 
 if __name__ == "__main__":
     loc = argv[1]
