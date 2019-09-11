@@ -21,9 +21,10 @@ cd ensembl-vep
 ```shell
 python ../AnnotatingCNVs/python_scripts/install.py
 ```
-5. Add the following line to your path:
+5. Add the following lines to your path or profile:
 ```shell
 export PATH=$PATH:~/route/to/plannotator/folder/bin
+export Ontologizer=~/route/to/plannotator/folder/Ontologizer.jar
 ```
 6. To install the conda package(this assumes that conda is installed if this is not the case it can be downloaded here; https://docs.anaconda.com/anaconda/install/) that contains all python scripts use the envirionment.yaml file that was just downloaded from github use the commands below to get all modules installed in an evironment named plannotater.
 ```shell
