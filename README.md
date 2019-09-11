@@ -80,7 +80,11 @@ Example of a command to run the annotation of your vcf file:
 ```shell
 annotate_cnvs.nf --vcf location/of/vcf/file --cache_dir directory/of/downloaded/cache --cache_version cache/verion --species name/of/species --output_dir name/of/output/directory --obo obo/file --association association/file/of/species --population all/known/genes/of/species
 ```
-Example of a command for running the dash application:
+If you want to run the Dash application it will be hosted on the local server of your network (http://127.0.0.1:8050/). To acces this from a server you have to run two screens. One that is running the Dash application in the background and one that opens an internet browser to view the page. Example of a command for running the Dash application:
 ```shell
 visualise_vep.py name/of/output/directory/of/annotation/vcf
+```
+Command to open the local webpage from the server.
+```shell
+x-www-browser http://127.0.0.1:8050/
 ```
