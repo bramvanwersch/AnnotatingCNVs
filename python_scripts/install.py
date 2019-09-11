@@ -19,15 +19,15 @@ def install(location):
                     "Ontologizer.jar",\
                     "ensembl-vep/vep",\
                     "nextflow"]
-    #system("git clone https://github.com/Ensembl/ensembl-vep.git {}".format(location))
+    system("git clone https://github.com/Ensembl/ensembl-vep.git .")
     #system("git checkout release/96 {}".format(location))
     #system("perl {}/INSTALL.pl".format(location))
     #system("mkdir {}/caches".format(location))
-    system("wget http://ontologizer.de/cmdline/Ontologizer.jar -P ../{}".format(location))
-    system("cd ../{} && curl -s https://get.nextflow.io | bash".format(location))
-    system("mkdir -p ../{}/bin".format(location))
+    system("wget http://ontologizer.de/cmdline/Ontologizer.jar -P ..")
+    system("cd ../ && curl -s https://get.nextflow.io | bash")
+    system("mkdir -p ../bin")
     for file_loc in program_file_list:
-        system("ln -sf ../{}/{} ../{}/bin".format(location,file_loc, location))
+        system("ln -sf ../{} ../bin".format(file_loc))
 
 if __name__ == "__main__":
     loc = argv[1]
