@@ -8,7 +8,7 @@ Date: 13/06/2019
 
 from os import system
 
-def install(location):
+def install():
     program_file_list = ["AnnotatingCNVs/python_scripts/add_dispersed_insertions.py",\
                     "AnnotatingCNVs/python_scripts/correct_vep.py",\
                     "AnnotatingCNVs/python_scripts/vcf_analyser.py",\
