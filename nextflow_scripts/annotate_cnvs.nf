@@ -161,7 +161,6 @@ if (mode == "custom"){
 *because they had to be located here to be able to find them
 */
 process run_vep{
-	publishDir "${output}"
 	input:
 	file input_file from added_vcf
 	val species from params.species
