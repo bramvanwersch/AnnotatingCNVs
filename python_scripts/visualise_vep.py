@@ -664,7 +664,7 @@ def run_ontologizer(nc, sort_by, filter, input_name, GO_file, p_value, dfo, page
                     study_set = result_dir + val
             try:
                 # String representing the command to be executed
-                command_str = "nextflow run get_go_terms.nf --obo {} --association {} --population {} --study {} --output_dir {}" \
+                command_str = "get_go_terms.nf --obo {} --association {} --population {} --study {} --output_dir {}" \
                     .format(obo_file, association_file, population_file, study_set, result_dir)
                 system(command_str)
 
